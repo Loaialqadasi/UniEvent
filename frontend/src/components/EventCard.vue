@@ -25,6 +25,10 @@ defineProps({
         <span>{{ event.attendees }} / {{ event.capacity }} attending</span>
         <strong>{{ event.price }}</strong>
       </div>
+
+      <RouterLink class="event-card__book button button--primary" :to="`/events/${event.id}`">
+        View & Book
+      </RouterLink>
     </div>
   </article>
 </template>
@@ -93,5 +97,13 @@ defineProps({
 
 .event-card__foot strong {
   color: #1748c8;
+}
+
+.event-card__book {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 12px;
+  text-decoration: none;
 }
 </style>
