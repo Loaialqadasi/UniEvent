@@ -44,6 +44,7 @@ watch(
 
       <nav id="main-menu" class="menu" :class="{ 'menu--open': isMenuOpen }" aria-label="Main navigation">
         <RouterLink to="/events" class="menu__item">Events</RouterLink>
+        <RouterLink to="/bookings" class="menu__item">My Bookings</RouterLink>
         <RouterLink to="/calendar" class="menu__item">Calendar</RouterLink>
         <RouterLink to="/notifications" class="menu__item">Notifications</RouterLink>
         <span v-if="currentUser" class="menu__role">

@@ -7,9 +7,9 @@
   --text: #1f2937;
   --text-muted: #64748b;
   --border: #d6deea;
-  --primary: #1d4ed8;
-  --primary-hover: #1e40af;
-  --primary-soft: #dbeafe;
+  --primary: #4f39f6;
+  --primary-hover: #432dd7;
+  --primary-soft: #eef2ff;
   --danger: #b42318;
   --warning: #b54708;
   --success: #067647;
@@ -33,7 +33,7 @@ body {
   margin: 0;
   font-family: 'Manrope', sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at 15% 15%, #dde8ff 0%, var(--bg) 42%, #eef3fa 100%);
+  background: radial-gradient(circle at 15% 15%, #e5e7ff 0%, var(--bg) 42%, #eef3fa 100%);
 }
 
 .app-shell {
@@ -76,7 +76,7 @@ body {
   place-items: center;
   font-size: 13px;
   color: #fff;
-  background: linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%);
+  background: linear-gradient(145deg, #4f39f6 0%, #312e81 100%);
 }
 
 .menu-toggle {
@@ -111,12 +111,12 @@ body {
 
 .menu__item:hover {
   background: var(--primary-soft);
-  color: #1e40af;
+  color: #4f39f6;
 }
 
 .menu__item.router-link-active {
   color: #fff;
-  background: linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%);
+  background: linear-gradient(145deg, #4f39f6 0%, #312e81 100%);
 }
 
 .menu__role {
@@ -182,11 +182,11 @@ body {
 
 .button--primary {
   color: #fff;
-  background: linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%);
+  background: linear-gradient(145deg, #4f39f6 0%, #312e81 100%);
 }
 
 .button--primary:hover:not(:disabled) {
-  background: linear-gradient(145deg, #1e40af 0%, #1e3a8a 100%);
+  background: linear-gradient(145deg, #432dd7 0%, #312e81 100%);
 }
 
 .button--secondary {
@@ -224,7 +224,7 @@ body {
 
 .chip--active {
   color: #fff;
-  background: #1e3a8a;
+  background: #4f39f6;
 }
 
 .input,
@@ -243,9 +243,9 @@ body {
 .input:focus,
 .select:focus,
 .textarea:focus {
-  outline: 2px solid #bfdbfe;
+  outline: 2px solid #c7d2fe;
   outline-offset: 0;
-  border-color: #60a5fa;
+  border-color: #4f39f6;
 }
 
 .textarea {

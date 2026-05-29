@@ -1,4 +1,8 @@
+import axios from 'axios'
+
 const wait = (ms = 900) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const DEMO_USER_ID = 1
 
 export function validateCardPayment(details) {
   const errors = {}
@@ -23,7 +27,7 @@ export function validateCardPayment(details) {
   return errors
 }
 
-export async function simulatePayment({ amount, method, details }) {
+export async function simulatePayment({ amount, method, details, forceFailure = false }) {
   await wait()
 
   if (method === 'card') {
@@ -37,5 +41,54 @@ export async function simulatePayment({ amount, method, details }) {
     return { ok: false, errors: { payment: 'Invalid payment amount.' } }
   }
 
-  return { ok: true, transactionId: `TXN-${Date.now()}` }
+  if (forceFailure) {
+    return {
+      ok: false,
+      transactionId: `TXN-${Date.now()}`,
+      status: 'failed',
+      errors: { payment: 'Demo failed payment: transaction declined by simulator.' },
+    }
+  }
+
+  return {
+    ok: true,
+    transactionId: `TXN-${Date.now()}`,
+    status: 'successful',
+  }
+}
+
+export function createPaymentPayload({ bookingId, amount, method, status }) {
+  return {
+    user_id: DEMO_USER_ID,
+    booking_id: bookingId,
+    amount,
+    payment_method: method,
+    payment_status: status,
+    payment_date: new Date().toISOString(),
+  }
+}
+
+export function createLocalPaymentRecord({ bookingId, amount, method, status, transactionId }) {
+  return {
+    ...createPaymentPayload({ bookingId, amount, method, status }),
+    payment_id: transactionId,
+  }
+}
+
+export const paymentApiRoutes = {
+  create: '/api/payments',
+  history: (userId = DEMO_USER_ID) => `/api/payments/user/${userId}`,
+}
+
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
+})
+
+export const paymentService = {
+  createPayment(payload) {
+    return apiClient.post(paymentApiRoutes.create, payload)
+  },
+  getUserPayments(userId = DEMO_USER_ID) {
+    return apiClient.get(paymentApiRoutes.history(userId))
+  },
 }

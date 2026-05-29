@@ -7,9 +7,11 @@ const props = defineProps({
 })
 
 const steps = [
-  { id: 1, label: 'Tickets' },
-  { id: 2, label: 'Payment' },
-  { id: 3, label: 'Done' },
+  { id: 1, label: 'Event' },
+  { id: 2, label: 'Tickets' },
+  { id: 3, label: 'Review' },
+  { id: 4, label: 'Payment' },
+  { id: 5, label: 'Done' },
 ]
 </script>
 
@@ -29,13 +31,15 @@ const steps = [
 
 <style scoped>
 .booking-stepper {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 10px;
   padding: 0;
   margin: 0;
   list-style: none;
+  overflow: hidden;
 }
 
 .booking-stepper__item {
@@ -61,6 +65,7 @@ const steps = [
 .booking-stepper__label {
   color: #99a1af;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .booking-stepper__label--active {
@@ -68,8 +73,9 @@ const steps = [
 }
 
 .booking-stepper__line {
-  width: 48px;
+  width: clamp(18px, 4vw, 48px);
   height: 4px;
+  flex: 0 1 48px;
   border-radius: 999px;
   background: #e5e7eb;
 }
@@ -80,15 +86,19 @@ const steps = [
 
 @media (max-width: 620px) {
   .booking-stepper {
-    gap: 8px;
+    gap: 6px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
   }
 
   .booking-stepper__line {
-    width: 24px;
+    width: 20px;
+    flex-basis: 20px;
   }
 
   .booking-stepper__label {
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 </style>

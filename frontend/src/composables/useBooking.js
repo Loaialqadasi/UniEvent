@@ -10,7 +10,10 @@ export function useBooking() {
     loadEvent: bookingStore.loadEvent,
     setQuantity: bookingStore.setQuantity,
     setPaymentMethod: bookingStore.setPaymentMethod,
-    confirmPayment: bookingStore.confirmPayment,
+    startBooking: bookingStore.startBooking,
+    updateBookingQuantity: bookingStore.updateBookingQuantity,
+    cancelBooking: bookingStore.cancelBooking,
+    recordPaymentAttempt: bookingStore.recordPaymentAttempt,
     resetBooking: bookingStore.resetBooking,
   }
 }
