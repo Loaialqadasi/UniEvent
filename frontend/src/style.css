@@ -119,6 +119,21 @@ body {
   background: linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%);
 }
 
+.menu__role {
+  margin-left: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #1e3a8a;
+  background: #dbeafe;
+}
+
+.menu__logout {
+  margin-left: 6px;
+  padding: 7px 12px;
+}
+
 .page-wrapper {
   max-width: 1180px;
   margin: 0 auto;
@@ -306,6 +321,13 @@ body {
   .menu__item {
     text-align: center;
     border-radius: 10px;
+  }
+
+  .menu__role,
+  .menu__logout {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
   }
 
   .page-wrapper {
