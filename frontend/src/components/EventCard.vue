@@ -1,10 +1,15 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   event: {
     type: Object,
     required: true,
   },
 })
+
+const seatsLeft = computed(() => Math.max(0, props.event.capacity - props.event.attendees))
+const isFull = computed(() => seatsLeft.value <= 0)
 </script>
 
 <template>
@@ -26,9 +31,14 @@ defineProps({
         <strong>{{ event.price }}</strong>
       </div>
 
-      <RouterLink class="event-card__book button button--primary" :to="`/events/${event.id}`">
-        View & Book
-      </RouterLink>
+      <div class="event-card__action-row">
+        <span class="event-card__seats" :class="isFull ? 'event-card__seats--full' : 'event-card__seats--open'">
+          {{ isFull ? 'Full' : `${seatsLeft} seats left` }}
+        </span>
+        <RouterLink class="event-card__book button button--primary" :to="`/events/${event.id}`">
+          View & Book
+        </RouterLink>
+      </div>
     </div>
   </article>
 </template>
@@ -99,11 +109,31 @@ defineProps({
   color: #1748c8;
 }
 
+.event-card__action-row {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.event-card__seats {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.event-card__seats--open {
+  color: #15803d;
+}
+
+.event-card__seats--full {
+  color: #dc2626;
+}
+
 .event-card__book {
   display: inline-flex;
   justify-content: center;
-  width: 100%;
-  margin-top: 12px;
+  white-space: nowrap;
   text-decoration: none;
 }
 </style>

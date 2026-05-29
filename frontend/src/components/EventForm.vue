@@ -14,6 +14,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // When provided, the form will enter "edit" mode and pre-fill fields
+  editData: {
+    type: Object,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'submit'])
@@ -32,14 +37,25 @@ const form = reactive({
 const errors = reactive({})
 
 const reset = () => {
-  form.title = ''
-  form.category = props.categories[0] ?? 'Technology'
-  form.date = ''
-  form.time = ''
-  form.venue = ''
-  form.capacity = ''
-  form.price = ''
-  form.description = ''
+  if (props.editData) {
+    form.title = props.editData.title ?? ''
+    form.category = props.editData.category ?? (props.categories[0] ?? 'Technology')
+    form.date = props.editData.date ?? ''
+    form.time = props.editData.time ?? ''
+    form.venue = props.editData.venue ?? ''
+    form.capacity = String(props.editData.capacity ?? '')
+    form.price = props.editData.price ?? ''
+    form.description = props.editData.description ?? ''
+  } else {
+    form.title = ''
+    form.category = props.categories[0] ?? 'Technology'
+    form.date = ''
+    form.time = ''
+    form.venue = ''
+    form.capacity = ''
+    form.price = ''
+    form.description = ''
+  }
 
   Object.keys(errors).forEach((key) => {
     delete errors[key]
@@ -50,6 +66,15 @@ watch(
   () => props.modelValue,
   (open) => {
     if (open) {
+      reset()
+    }
+  }
+)
+
+watch(
+  () => props.editData,
+  () => {
+    if (props.modelValue) {
       reset()
     }
   }
@@ -97,19 +122,27 @@ const handleSubmit = () => {
     return
   }
 
-  emit('submit', {
+  const payload = {
     ...form,
     capacity: Number(form.capacity),
-    attendees: 0,
-    image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
-  })
+  }
+
+  if (props.editData) {
+    emit('submit', { ...payload, id: props.editData.id, attendees: props.editData.attendees })
+  } else {
+    emit('submit', {
+      ...payload,
+      attendees: 0,
+      image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+    })
+  }
 }
 </script>
 
 <template>
   <aside v-if="modelValue" class="event-form panel">
     <div class="event-form__head">
-      <h2>Create New Event</h2>
+      <h2>{{ editData ? 'Edit Event' : 'Create New Event' }}</h2>
       <button class="button button--ghost" type="button" @click="emit('update:modelValue', false)">
         Close
       </button>
@@ -172,7 +205,7 @@ const handleSubmit = () => {
     </div>
 
     <button type="button" class="button button--primary" :disabled="busy" @click="handleSubmit">
-      {{ busy ? 'Saving...' : 'Publish Event' }}
+      {{ busy ? 'Saving...' : editData ? 'Save Changes' : 'Publish Event' }}
     </button>
   </aside>
 </template>

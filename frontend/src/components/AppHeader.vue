@@ -1,9 +1,20 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+import { authState, logout } from '../service/auth'
 
 const route = useRoute()
+const router = useRouter()
 const isMenuOpen = ref(false)
+
+const currentUser = computed(() => authState.user)
+
+const onLogout = async () => {
+  logout()
+  isMenuOpen.value = false
+  await router.replace('/login')
+}
 
 watch(
   () => route.path,
@@ -36,6 +47,12 @@ watch(
         <RouterLink to="/bookings" class="menu__item">My Bookings</RouterLink>
         <RouterLink to="/calendar" class="menu__item">Calendar</RouterLink>
         <RouterLink to="/notifications" class="menu__item">Notifications</RouterLink>
+        <span v-if="currentUser" class="menu__role">
+          {{ currentUser.role === 'organizer' ? 'Organizer' : 'Student' }}
+        </span>
+        <button class="button button--secondary menu__logout" type="button" @click="onLogout">
+          Logout
+        </button>
       </nav>
     </div>
   </header>
