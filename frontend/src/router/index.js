@@ -7,6 +7,7 @@ import EventDetailsView from '../views/EventDetailsView.vue'
 import BookingReviewView from '../views/BookingReviewView.vue'
 import PaymentView from '../views/PaymentView.vue'
 import BookingSuccessView from '../views/BookingSuccessView.vue'
+import BookingHistoryView from '../views/BookingHistoryView.vue'
 
 const routes = [
 	{
@@ -37,6 +38,11 @@ const routes = [
 		path: '/booking/success',
 		name: 'booking-success',
 		component: BookingSuccessView,
+	},
+	{
+		path: '/bookings',
+		name: 'booking-history',
+		component: BookingHistoryView,
 	},
 	{
 		path: '/calendar',
