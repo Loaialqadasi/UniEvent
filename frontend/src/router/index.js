@@ -8,6 +8,8 @@ import EventDetailsView from '../views/EventDetailsView.vue'
 import BookingReviewView from '../views/BookingReviewView.vue'
 import PaymentView from '../views/PaymentView.vue'
 import BookingSuccessView from '../views/BookingSuccessView.vue'
+import BookingHistoryView from '../views/BookingHistoryView.vue'
+import { isAuthenticated, isRoleAllowed } from '../service/auth'
 
 const routes = [
 	{
@@ -53,6 +55,7 @@ const routes = [
 		path: '/bookings',
 		name: 'booking-history',
 		component: BookingHistoryView,
+		meta: { requiresAuth: true, roles: ['student'] },
 	},
 	{
 		path: '/calendar',
