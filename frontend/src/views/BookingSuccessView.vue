@@ -11,7 +11,7 @@ const router = useRouter()
 const booking = useBooking()
 
 onMounted(() => {
-  if (!booking.bookingReference.value || booking.paymentStatus.value !== 'successful') {
+  if (!booking.bookingReference.value || (booking.paymentStatus.value !== 'successful' && booking.paymentStatus.value !== 'completed' && booking.paymentStatus.value !== 'free')) {
     router.replace('/events')
   }
 })

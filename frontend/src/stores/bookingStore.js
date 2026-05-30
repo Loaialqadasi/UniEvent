@@ -88,7 +88,13 @@ export const useBookingStore = defineStore('booking', () => {
     try {
       event.value = await fetchEventForBooking(eventId)
       maxTickets.value = getAllowedTicketLimit(event.value)
-      setQuantity(quantity.value)
+      
+      const isCompleted = bookingStatus.value === 'active' || bookingStatus.value === 'confirmed'
+      if (!event.value || String(event.value.id) !== String(eventId) || isCompleted) {
+        resetBooking()
+      } else {
+        setQuantity(quantity.value)
+      }
     } catch (error) {
       eventError.value = 'Unable to load booking details. Please try again.'
     } finally {
@@ -118,8 +124,9 @@ export const useBookingStore = defineStore('booking', () => {
       return null
     }
 
-    const reference = bookingReference.value || generateBookingReference()
-    const existingId = activeBookingId.value
+    const isCompleted = bookingStatus.value === 'active' || bookingStatus.value === 'confirmed'
+    const reference = (isCompleted ? '' : bookingReference.value) || generateBookingReference()
+    const existingId = isCompleted ? '' : activeBookingId.value
     const record = createLocalBookingRecord({
       event: event.value,
       quantity: quantity.value,
@@ -190,7 +197,13 @@ export const useBookingStore = defineStore('booking', () => {
 
     transactionId.value = paymentTransactionId
     paymentStatus.value = status
-    bookingStatus.value = status === 'successful' ? 'active' : 'payment_failed'
+    if (status === 'successful') {
+      bookingStatus.value = 'active'
+    } else if (status === 'completed' || status === 'free') {
+      bookingStatus.value = 'confirmed'
+    } else {
+      bookingStatus.value = 'payment_failed'
+    }
 
     bookingHistory.value = bookingHistory.value.map((item) => {
       if (item.booking_id !== bookingId) {
@@ -200,6 +213,7 @@ export const useBookingStore = defineStore('booking', () => {
       return {
         ...item,
         booking_status: bookingStatus.value,
+        payment_status: status,
       }
     })
 

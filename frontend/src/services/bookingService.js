@@ -77,6 +77,7 @@ export function createLocalBookingRecord({ event, quantity, totals, reference, s
       ticketPrice: event.ticketPrice,
     },
     amount: totals.total,
+    payment_status: 'pending',
   }
 }
 
