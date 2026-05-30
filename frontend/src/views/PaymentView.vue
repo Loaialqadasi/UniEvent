@@ -33,6 +33,16 @@ const completePayment = async () => {
   paymentError.value = ''
   fieldErrors.value = {}
 
+  if (booking.total.value === 0) {
+    booking.recordPaymentAttempt({
+      status: 'completed',
+      paymentTransactionId: `FREE-${Date.now()}`,
+    })
+    processing.value = false
+    router.push('/booking/success')
+    return
+  }
+
   const result = await simulatePayment({
     amount: booking.total.value,
     method: booking.paymentMethod.value,
@@ -71,12 +81,12 @@ onMounted(() => {
     <div class="payment-panel">
       <BookingStepper :current-step="4" />
 
-      <h1>Payment Simulator</h1>
+      <h1>{{ booking.total.value === 0 ? 'Booking Confirmation' : 'Payment Simulator' }}</h1>
 
-      <PaymentMethodSelector :model-value="booking.paymentMethod.value" @update:model-value="booking.setPaymentMethod" />
+      <PaymentMethodSelector v-if="booking.total.value > 0" :model-value="booking.paymentMethod.value" @update:model-value="booking.setPaymentMethod" />
 
       <!-- Inlined CardPaymentForm -->
-      <div v-if="booking.paymentMethod.value === 'card'" class="card-form">
+      <div v-if="booking.total.value > 0 && booking.paymentMethod.value === 'card'" class="card-form">
         <div class="field field--full">
           <label for="cardName">Name on Card</label>
           <input id="cardName" v-model="cardDetails.cardName" class="input" type="text" placeholder="Aiman Hakim" />
@@ -102,13 +112,13 @@ onMounted(() => {
         </div>
       </div>
 
-      <label class="failure-toggle">
+      <label v-if="booking.total.value > 0" class="failure-toggle">
         <input v-model="forceFailure" type="checkbox" />
         <span>Simulate failed payment</span>
       </label>
 
       <!-- Inlined DemoAlert -->
-      <div class="demo-alert">
+      <div v-if="booking.total.value > 0" class="demo-alert">
         <strong>Demo Mode:</strong>
         <span>This is a payment simulator. No actual charges will be made.</span>
       </div>
@@ -130,7 +140,7 @@ onMounted(() => {
           :disabled="processing"
           @click="completePayment"
         >
-          {{ processing ? 'Processing...' : 'Complete Payment' }}
+          {{ processing ? 'Processing...' : (booking.total.value === 0 ? 'Complete Booking' : 'Complete Payment') }}
         </button>
       </div>
     </div>

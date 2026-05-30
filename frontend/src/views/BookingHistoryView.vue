@@ -3,6 +3,19 @@ import BookingStepper from '../components/booking/BookingStepper.vue'
 import { useBooking } from '../composables/useBooking'
 
 const booking = useBooking()
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  try {
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  } catch {
+    return dateStr
+  }
+}
 </script>
 
 <template>
@@ -37,8 +50,20 @@ const booking = useBooking()
             <dd>{{ item.booking_status }}</dd>
           </div>
           <div>
+            <dt>Payment Status</dt>
+            <dd>{{ item.payment_status || 'completed' }}</dd>
+          </div>
+          <div>
+            <dt>Quantity</dt>
+            <dd>{{ item.ticket_quantity }}</dd>
+          </div>
+          <div>
             <dt>Total</dt>
             <dd>RM {{ item.amount.toFixed(2) }}</dd>
+          </div>
+          <div>
+            <dt>Booking Date</dt>
+            <dd>{{ formatDate(item.booking_date) }}</dd>
           </div>
         </dl>
 

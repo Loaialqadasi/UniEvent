@@ -37,7 +37,7 @@ export async function simulatePayment({ amount, method, details, forceFailure = 
     }
   }
 
-  if (!amount || amount < 0) {
+  if (amount === undefined || amount === null || amount < 0) {
     return { ok: false, errors: { payment: 'Invalid payment amount.' } }
   }
 
