@@ -1,64 +1,84 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { MapPin, Users, Clock, ArrowRight, CheckCircle } from 'lucide-vue-next'
+import { computed, ref, onMounted } from 'vue'
+import { MapPin, Users, Clock, ArrowRight, CheckCircle, Loader2 } from 'lucide-vue-next'
 import { authState, registerForEvent, isRegisteredForEvent } from '../../service/auth'
-import { ref } from 'vue'
+import axios from 'axios'
 
 const isLoggedIn = computed(() => !!authState.user)
 
-const events = [
-  {
-    id: 'tech-summit',
-    title: 'Tech Innovation Summit 2026',
-    date: 'Jun 15, 2026',
-    location: 'Main Auditorium',
-    attendees: '350+',
-    image: '/images/event-tech.png',
-    badge: 'Technology',
-    badgeBg: 'bg-blue-100',
-    badgeColor: 'text-blue-700',
-  },
-  {
-    id: 'career-fair',
-    title: 'Annual Career Fair 2026',
-    date: 'Jul 2, 2026',
-    location: 'Student Center Hall',
-    attendees: '500',
-    image: '/images/event-career.png',
-    badge: 'Career',
-    badgeBg: 'bg-purple-100',
-    badgeColor: 'text-purple-700',
-  },
-  {
-    id: 'music-festival',
-    title: 'Music Festival Spring 2026',
-    date: 'Aug 20, 2026',
-    location: 'Campus Park',
-    attendees: '1000+',
-    image: '/images/event-music.png',
-    badge: 'Entertainment',
-    badgeBg: 'bg-pink-100',
-    badgeColor: 'text-pink-700',
-  },
-]
+interface Event {
+  id: number
+  title: string
+  date: string
+  time: string
+  location: string
+  attendees: number
+  category: string
+  price: string
+  image_url: string
+  description: string
+}
 
-const registeredEvents = ref<Set<string>>(new Set(
-  events.filter(e => isRegisteredForEvent(e.id)).map(e => e.id)
-))
+const allEvents = ref<Event[]>([])
+const isLoading = ref(true)
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('/data/events.json')
+    allEvents.value = response.data
+  } catch (err) {
+    console.error('Failed to fetch featured events:', err)
+  } finally {
+    isLoading.value = false
+  }
+})
+
+// Show only the first 3 events as featured
+const events = computed(() => allEvents.value.slice(0, 3))
+
+const categoryBadge = (category: string) => {
+  const map: Record<string, { bg: string; color: string }> = {
+    Technology: { bg: 'bg-blue-100', color: 'text-blue-700' },
+    Career: { bg: 'bg-purple-100', color: 'text-purple-700' },
+    Entertainment: { bg: 'bg-pink-100', color: 'text-pink-700' },
+    Academic: { bg: 'bg-yellow-100', color: 'text-yellow-700' },
+    Sports: { bg: 'bg-green-100', color: 'text-green-700' },
+    Arts: { bg: 'bg-orange-100', color: 'text-orange-700' },
+  }
+  return map[category] || { bg: 'bg-gray-100', color: 'text-gray-700' }
+}
+
+const registeredEvents = ref<Set<string>>(new Set())
+
+// Watch for events to load, then populate registeredEvents
+onMounted(() => {
+  setTimeout(() => {
+    if (allEvents.value.length > 0) {
+      registeredEvents.value = new Set(
+        allEvents.value.filter(e => isRegisteredForEvent(String(e.id))).map(e => String(e.id))
+      )
+    }
+  }, 200)
+})
 
 const registerMessage = ref<Record<string, { text: string; type: 'success' | 'error' }>>({})
 
-const handleRegister = (eventId: string) => {
-  const result = registerForEvent(eventId)
+const handleRegister = (eventId: number) => {
+  const eventIdStr = String(eventId)
+  const result = registerForEvent(eventIdStr)
   if (result.success) {
-    registeredEvents.value.add(eventId)
-    registerMessage.value[eventId] = { text: result.message, type: 'success' }
+    registeredEvents.value.add(eventIdStr)
+    registerMessage.value[eventIdStr] = { text: result.message, type: 'success' }
   } else {
-    registerMessage.value[eventId] = { text: result.message, type: 'error' }
+    registerMessage.value[eventIdStr] = { text: result.message, type: 'error' }
   }
   setTimeout(() => {
-    delete registerMessage.value[eventId]
+    delete registerMessage.value[eventIdStr]
   }, 3000)
+}
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 </script>
 
@@ -78,7 +98,13 @@ const handleRegister = (eventId: string) => {
         </router-link>
       </div>
 
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Loading -->
+      <div v-if="isLoading" class="flex flex-col items-center justify-center py-12">
+        <Loader2 class="w-8 h-8 text-indigo-500 animate-spin mb-3" />
+        <p class="text-gray-400 text-sm">Loading featured events...</p>
+      </div>
+
+      <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="event in events"
           :key="event.id"
@@ -86,23 +112,23 @@ const handleRegister = (eventId: string) => {
         >
           <div class="relative h-48 overflow-hidden">
             <img
-              :src="event.image"
+              :src="event.image_url"
               :alt="event.title"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             <span
-              :class="[event.badgeBg, event.badgeColor]"
+              :class="[categoryBadge(event.category).bg, categoryBadge(event.category).color]"
               class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold"
             >
-              {{ event.badge }}
+              {{ event.category }}
             </span>
           </div>
           <div class="p-5">
             <h3 class="text-lg font-semibold text-gray-900 mb-3">{{ event.title }}</h3>
             <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
               <span class="flex items-center gap-1.5">
-                <Clock class="w-4 h-4 text-gray-400" /> {{ event.date }}
+                <Clock class="w-4 h-4 text-gray-400" /> {{ formatDate(event.date) }}
               </span>
               <span class="flex items-center gap-1.5">
                 <MapPin class="w-4 h-4 text-gray-400" /> {{ event.location }}
@@ -113,7 +139,7 @@ const handleRegister = (eventId: string) => {
                 <Users class="w-4 h-4" /> {{ event.attendees }} going
               </span>
               <button
-                v-if="registeredEvents.has(event.id)"
+                v-if="registeredEvents.has(String(event.id))"
                 disabled
                 class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-sm font-medium px-4 py-2 rounded-lg border-none cursor-default"
               >
@@ -124,13 +150,13 @@ const handleRegister = (eventId: string) => {
                 @click.stop="handleRegister(event.id)"
                 class="bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg border-none cursor-pointer hover:bg-indigo-600 transition-colors"
               >
-                Register
+                {{ isLoggedIn ? 'Register' : 'Sign In to Register' }}
               </button>
             </div>
             <!-- Success/Error Message -->
-            <div v-if="registerMessage[event.id]" class="mt-3 text-sm px-3 py-2 rounded-lg"
-              :class="registerMessage[event.id].type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'">
-              {{ registerMessage[event.id].text }}
+            <div v-if="registerMessage[String(event.id)]" class="mt-3 text-sm px-3 py-2 rounded-lg"
+              :class="registerMessage[String(event.id)].type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'">
+              {{ registerMessage[String(event.id)].text }}
             </div>
           </div>
         </div>
