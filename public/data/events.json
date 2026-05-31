@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "title": "Tech Innovation Summit 2026",
+    "date": "2026-06-15",
+    "time": "9:00 AM - 5:00 PM",
+    "location": "Main Auditorium, Block A",
+    "category": "Technology",
+    "price": "Free",
+    "attendees": 245,
+    "image_url": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=640&q=80",
+    "description": "A full-day summit featuring talks from industry leaders on AI, blockchain, and the future of technology in education."
+  },
+  {
+    "id": 2,
+    "title": "Art Exhibition: Beyond Canvas",
+    "date": "2026-06-20",
+    "time": "10:00 AM - 4:00 PM",
+    "location": "Creative Arts Gallery",
+    "category": "Arts",
+    "price": "Free Entry",
+    "attendees": 120,
+    "image_url": "https://images.unsplash.com/photo-1531913764164-f85c3e01e2e3?w=640&q=80",
+    "description": "Explore contemporary art pieces created by students and local artists. Interactive installations and live painting sessions."
+  },
+  {
+    "id": 3,
+    "title": "Basketball Championship Finals",
+    "date": "2026-06-25",
+    "time": "3:00 PM - 6:00 PM",
+    "location": "University Sports Complex",
+    "category": "Sports",
+    "price": "RM 5",
+    "attendees": 380,
+    "image_url": "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=640&q=80",
+    "description": "Watch the top two university teams compete for the championship trophy. Food stalls and half-time entertainment included."
+  },
+  {
+    "id": 4,
+    "title": "Annual Career Fair 2026",
+    "date": "2026-07-02",
+    "time": "9:00 AM - 3:00 PM",
+    "location": "Grand Hall, Student Center",
+    "category": "Career",
+    "price": "Free",
+    "attendees": 520,
+    "image_url": "https://images.unsplash.com/photo-1569025690938-a00729c9e1f9?w=640&q=80",
+    "description": "Connect with top employers and explore internship and job opportunities. Bring your resume and dress professionally."
+  },
+  {
+    "id": 5,
+    "title": "Music Festival: Sounds of Campus",
+    "date": "2026-07-10",
+    "time": "6:00 PM - 10:00 PM",
+    "location": "Open Air Stage, Lake Park",
+    "category": "Entertainment",
+    "price": "RM 25",
+    "attendees": 450,
+    "image_url": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=640&q=80",
+    "description": "An evening of live music featuring student bands and a special guest DJ. Food trucks and glow sticks available."
+  },
+  {
+    "id": 6,
+    "title": "Wellness & Yoga Workshop",
+    "date": "2026-07-15",
+    "time": "8:00 AM - 11:00 AM",
+    "location": "Wellness Room, Block C",
+    "category": "Academic",
+    "price": "RM 10",
+    "attendees": 75,
+    "image_url": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=640&q=80",
+    "description": "Start your semester right with guided yoga and mindfulness sessions. Mats and refreshments provided."
+  },
+  {
+    "id": 7,
+    "title": "AI & Machine Learning Workshop",
+    "date": "2026-07-20",
+    "time": "2:00 PM - 5:00 PM",
+    "location": "Computer Lab 3, Block B",
+    "category": "Technology",
+    "price": "Free",
+    "attendees": 160,
+    "image_url": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=640&q=80",
+    "description": "Hands-on workshop covering Python, TensorFlow, and practical ML applications. Laptops required."
+  },
+  {
+    "id": 8,
+    "title": "Debate Championship 2026",
+    "date": "2026-07-25",
+    "time": "10:00 AM - 4:00 PM",
+    "location": "Lecture Hall 2, Block A",
+    "category": "Academic",
+    "price": "Free",
+    "attendees": 200,
+    "image_url": "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=640&q=80",
+    "description": "Watch top debaters from across the region compete. Audience voting for the People's Choice award."
+  },
+  {
+    "id": 9,
+    "title": "Film Screening Night",
+    "date": "2026-08-01",
+    "time": "7:00 PM - 10:00 PM",
+    "location": "Mini Theater, Arts Building",
+    "category": "Entertainment",
+    "price": "RM 8",
+    "attendees": 95,
+    "image_url": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=640&q=80",
+    "description": "A curated selection of short films by student filmmakers followed by a Q&A panel with the directors."
+  }
+]
