@@ -47,6 +47,8 @@ watch(
         <RouterLink v-if="currentUser?.role === 'student'" to="/bookings" class="menu__item">My Bookings</RouterLink>
         <RouterLink to="/calendar" class="menu__item">Calendar</RouterLink>
         <RouterLink to="/notifications" class="menu__item">Notifications</RouterLink>
+        <RouterLink to="/forum" class="menu__item">Forum</RouterLink>
+        <RouterLink to="/feedback" class="menu__item">Feedback</RouterLink>
         <span v-if="currentUser" class="menu__role">
           {{ currentUser.role === 'organizer' ? 'Organizer' : 'Student' }}
         </span>

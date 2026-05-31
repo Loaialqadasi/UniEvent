@@ -9,6 +9,9 @@ import BookingReviewView from '../views/BookingReviewView.vue'
 import PaymentView from '../views/PaymentView.vue'
 import BookingSuccessView from '../views/BookingSuccessView.vue'
 import BookingHistoryView from '../views/BookingHistoryView.vue'
+import ForumView from '../views/ForumView.vue'
+import ForumDetailView from '../views/ForumDetailView.vue'
+import FeedbackView from '../views/FeedbackView.vue'
 import { isAuthenticated, isRoleAllowed } from '../service/auth'
 
 const routes = [
@@ -67,6 +70,24 @@ const routes = [
 		path: '/notifications',
 		name: 'notifications',
 		component: NotificationsView,
+		meta: { requiresAuth: true, roles: ['student', 'organizer'] },
+	},
+	{
+		path: '/forum',
+		name: 'forum',
+		component: ForumView,
+		meta: { requiresAuth: true, roles: ['student', 'organizer'] },
+	},
+	{
+		path: '/forum/:id',
+		name: 'forum-detail',
+		component: ForumDetailView,
+		meta: { requiresAuth: true, roles: ['student', 'organizer'] },
+	},
+	{
+		path: '/feedback',
+		name: 'feedback',
+		component: FeedbackView,
 		meta: { requiresAuth: true, roles: ['student', 'organizer'] },
 	},
 ]

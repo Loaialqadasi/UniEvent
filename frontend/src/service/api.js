@@ -319,3 +319,324 @@ export async function sendPushNotification(payload) {
   deliverPushToStudentInbox(item)
   return item
 }
+
+// ─── Forum Discussion (Mock DB & API) ───────────────────────────────────────
+
+let postIdCounter = 6
+let commentIdCounter = 11
+
+let forumPosts = [
+  {
+    postId: 1,
+    eventId: 1,
+    title: 'Looking for Vue.js Devs for Summit Showcase',
+    content: 'Hey everyone! My team is looking for a Vue.js developer to help us finish our final prototype for the Tech Innovation Summit showcase. We have the backend ready in Node.js. Drop a comment if interested!',
+    author: 'Bob Lim',
+    createdAt: '2026-05-28T14:30:00Z',
+  },
+  {
+    postId: 2,
+    eventId: 2,
+    title: 'Preparation Guide for Resume Reviews',
+    content: 'Hi juniors, just wanted to share some tips for the resume reviews at the Career Fair. Make sure to print at least 5 copies of your resume, highlight your GitHub projects, and practice a 30-second elevator pitch. Good luck!',
+    author: 'Alice Tan',
+    createdAt: '2026-05-29T09:15:00Z',
+  },
+  {
+    postId: 3,
+    eventId: 3,
+    title: 'Food Vendor Applications and Lineup Details',
+    content: 'Does anyone know if the food trucks line-up is finalized yet? Last year we had awesome options, hoping we get local burgers and bubble tea again. Also, will there be vegetarian options?',
+    author: 'Charlie Teh',
+    createdAt: '2026-05-30T16:45:00Z',
+  },
+  {
+    postId: 4,
+    eventId: 4,
+    title: 'Poster Presentation Templates and Guideline',
+    content: 'For those presenting at the symposium, can we use standard UTM PowerPoint slide layouts or is there a specific template we must adhere to? The submission portal mentions A0 format size.',
+    author: 'Dr. Farah',
+    createdAt: '2026-05-25T11:00:00Z',
+  },
+  {
+    postId: 5,
+    eventId: 5,
+    title: 'Rules regarding external players and supporters',
+    content: "Can students from other colleges or universities enter the sports complex to support our teams? My friends want to come, but they don't have UTM student IDs. Do they need tickets?",
+    author: 'David Chong',
+    createdAt: '2026-05-27T10:20:00Z',
+  },
+]
+
+let forumComments = [
+  {
+    commentId: 1,
+    postId: 1,
+    author: 'Sarah Ahmad',
+    content: "I'm interested! I have experience with Vue 3 and Pinia. Let's discuss.",
+    createdAt: '2026-05-28T15:00:00Z',
+  },
+  {
+    commentId: 2,
+    postId: 1,
+    author: 'Campus Organizer',
+    content: 'Great initiative. Feel free to use the computer labs if you need space.',
+    createdAt: '2026-05-28T16:30:00Z',
+  },
+  {
+    commentId: 3,
+    postId: 2,
+    author: 'Jack Wong',
+    content: 'Thanks for the tips, Alice! Do we need to dress in formal attire?',
+    createdAt: '2026-05-29T10:00:00Z',
+  },
+  {
+    commentId: 4,
+    postId: 2,
+    author: 'Alice Tan',
+    content: 'Yes Jack, smart casual or formal is highly recommended by recruiters.',
+    createdAt: '2026-05-29T10:45:00Z',
+  },
+  {
+    commentId: 5,
+    postId: 2,
+    author: 'Liyana Rosli',
+    content: 'Is it open for first-year students too, or is it mostly for final-year students?',
+    createdAt: '2026-05-30T08:00:00Z',
+  },
+  {
+    commentId: 6,
+    postId: 3,
+    author: 'Campus Organizer',
+    content: 'Yes, I heard there will be 12 food trucks this year, including vegetarian choices!',
+    createdAt: '2026-05-30T17:00:00Z',
+  },
+  {
+    commentId: 7,
+    postId: 3,
+    author: 'Amirul Amin',
+    content: 'Hyped for the local bands lineup. Hope the rain doesn\'t ruin it.',
+    createdAt: '2026-05-30T18:15:00Z',
+  },
+  {
+    commentId: 8,
+    postId: 4,
+    author: 'Siti Aminah',
+    content: 'You can download the UTM poster template from the library website.',
+    createdAt: '2026-05-26T09:30:00Z',
+  },
+  {
+    commentId: 9,
+    postId: 4,
+    author: 'Dr. Farah',
+    content: 'Yes, A0 vertical orientation is standard for our poster boards.',
+    createdAt: '2026-05-26T12:00:00Z',
+  },
+  {
+    commentId: 10,
+    postId: 5,
+    author: 'Kamal Hassan',
+    content: 'They can buy entry tickets at the gate for RM 10, no student card required!',
+    createdAt: '2026-05-27T11:40:00Z',
+  },
+]
+
+export async function fetchForumPosts() {
+  await wait(400)
+  return [...forumPosts]
+}
+
+export async function fetchForumPostById(postId) {
+  await wait(300)
+  const post = forumPosts.find((p) => p.postId === Number(postId))
+  if (!post) throw new Error('Forum post not found')
+  return { ...post }
+}
+
+export async function createForumPost(payload) {
+  await wait(600)
+  if (!payload.title || payload.title.trim().length < 5) {
+    throw new Error('Title must be at least 5 characters.')
+  }
+  if (!payload.content || payload.content.trim().length < 20) {
+    throw new Error('Content must be at least 20 characters.')
+  }
+  if (!payload.eventId) {
+    throw new Error('Event association is required.')
+  }
+
+  const newPost = {
+    postId: postIdCounter++,
+    eventId: Number(payload.eventId),
+    title: payload.title.trim(),
+    content: payload.content.trim(),
+    author: payload.author || 'Anonymous Student',
+    createdAt: new Date().toISOString(),
+  }
+
+  forumPosts = [newPost, ...forumPosts]
+  return newPost
+}
+
+export async function deleteForumPost(postId) {
+  await wait(400)
+  forumPosts = forumPosts.filter((p) => p.postId !== Number(postId))
+  // clean comments
+  forumComments = forumComments.filter((c) => c.postId !== Number(postId))
+  return { success: true }
+}
+
+export async function fetchCommentsForPost(postId) {
+  await wait(300)
+  return forumComments
+    .filter((c) => c.postId === Number(postId))
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+}
+
+export async function createComment(payload) {
+  await wait(400)
+  if (!payload.content || payload.content.trim().length < 2) {
+    throw new Error('Comment must be at least 2 characters.')
+  }
+
+  const newComment = {
+    commentId: commentIdCounter++,
+    postId: Number(payload.postId),
+    author: payload.author || 'Anonymous Student',
+    content: payload.content.trim(),
+    createdAt: new Date().toISOString(),
+  }
+
+  forumComments = [...forumComments, newComment]
+  return newComment
+}
+
+export async function deleteComment(commentId) {
+  await wait(300)
+  forumComments = forumComments.filter((c) => c.commentId !== Number(commentId))
+  return { success: true }
+}
+
+// ─── Community Feedback (Mock DB & API) ─────────────────────────────────────
+
+let feedbackIdCounter = 11
+
+let feedbackRecords = [
+  {
+    feedbackId: 1,
+    eventId: 1,
+    rating: 5,
+    review: 'The Innovation Summit was absolutely amazing. Got to see so many creative projects. Highly recommended!',
+    user: 'Alice Tan',
+    createdAt: '2026-05-16T12:00:00Z',
+  },
+  {
+    feedbackId: 2,
+    eventId: 1,
+    rating: 4,
+    review: 'Very informative talks, but the hall was a bit crowded during the panel sessions. Overall good experience.',
+    user: 'Jack Wong',
+    createdAt: '2026-05-17T15:30:00Z',
+  },
+  {
+    feedbackId: 3,
+    eventId: 2,
+    rating: 5,
+    review: 'Super helpful! Managed to secure two internship interviews on the spot. Kudos to the organizers.',
+    user: 'Bob Lim',
+    createdAt: '2026-05-20T17:45:00Z',
+  },
+  {
+    feedbackId: 4,
+    eventId: 2,
+    rating: 3,
+    review: 'Good selection of companies, but the lines were way too long. Some booths ran out of brochures early.',
+    user: 'Liyana Rosli',
+    createdAt: '2026-05-20T18:10:00Z',
+  },
+  {
+    feedbackId: 5,
+    eventId: 3,
+    rating: 5,
+    review: 'Best event of the semester! Sound quality was top-notch and the atmosphere was electric.',
+    user: 'Charlie Teh',
+    createdAt: '2026-05-22T23:00:00Z',
+  },
+  {
+    feedbackId: 6,
+    eventId: 3,
+    rating: 4,
+    review: 'Loved the performances, but the food trucks were overpriced. Had a great time dancing though!',
+    user: 'Amirul Amin',
+    createdAt: '2026-05-22T23:45:00Z',
+  },
+  {
+    feedbackId: 7,
+    eventId: 4,
+    rating: 4,
+    review: 'Excellent research presentations. The poster session was very engaging. Learnt a lot about AI trends.',
+    user: 'Sarah Ahmad',
+    createdAt: '2026-05-23T16:20:00Z',
+  },
+  {
+    feedbackId: 8,
+    eventId: 4,
+    rating: 2,
+    review: 'The scheduling was messy. Some presentations overlapped and it was hard to follow.',
+    user: 'David Chong',
+    createdAt: '2026-05-23T17:00:00Z',
+  },
+  {
+    feedbackId: 9,
+    eventId: 5,
+    rating: 5,
+    review: 'Thrilling finals! The atmosphere in the complex was insane. Loved the halftime show.',
+    user: 'Kamal Hassan',
+    createdAt: '2026-05-29T21:30:00Z',
+  },
+  {
+    feedbackId: 10,
+    eventId: 6,
+    rating: 4,
+    review: 'Stunning displays of artwork. The student designers are very talented. Wish it was open for more days.',
+    user: 'Siti Aminah',
+    createdAt: '2026-05-30T10:00:00Z',
+  },
+]
+
+export async function fetchFeedback() {
+  await wait(450)
+  return [...feedbackRecords]
+}
+
+export async function submitFeedback(payload) {
+  await wait(650)
+  if (!payload.eventId) {
+    throw new Error('Please select an event.')
+  }
+  if (!payload.rating || payload.rating < 1 || payload.rating > 5) {
+    throw new Error('Please provide a rating between 1 and 5 stars.')
+  }
+  if (!payload.review || payload.review.trim().length < 10) {
+    throw new Error('Review comment must be at least 10 characters.')
+  }
+
+  const newFeedback = {
+    feedbackId: feedbackIdCounter++,
+    eventId: Number(payload.eventId),
+    rating: Number(payload.rating),
+    review: payload.review.trim(),
+    user: payload.user || 'Anonymous Student',
+    createdAt: new Date().toISOString(),
+  }
+
+  feedbackRecords = [newFeedback, ...feedbackRecords]
+  return newFeedback
+}
+
+export async function deleteFeedback(feedbackId) {
+  await wait(350)
+  feedbackRecords = feedbackRecords.filter((f) => f.feedbackId !== Number(feedbackId))
+  return { success: true }
+}
+
