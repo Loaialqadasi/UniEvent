@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { User, Mail, Lock, Camera, Calendar, MapPin, Users, CheckCircle, AlertCircle, Settings, BookOpen } from 'lucide-vue-next'
+import { User, Mail, Lock, Camera, Calendar, MapPin, Users, CheckCircle, AlertCircle, Settings, BookOpen, Search, Ticket, MessageCircle, Star, LayoutGrid, Clock } from 'lucide-vue-next'
 import { authState, updateProfile, changePassword, getUserRegistrations } from '../service/auth'
+import { fetchEvents } from '../service/api'
 
 // Active tab in dashboard
 const activeTab = ref('profile')
@@ -50,6 +51,7 @@ const userName = computed(() => authState.user?.name || '')
 const userEmail = computed(() => authState.user?.email || '')
 const userAvatar = computed(() => authState.user?.avatar || '')
 const userAvatarColor = computed(() => authState.user?.avatarColor || 'bg-indigo-500')
+const userRole = computed(() => authState.user?.role || 'student')
 
 // Load profile data on mount
 onMounted(() => {
@@ -61,27 +63,78 @@ onMounted(() => {
     profileStudentId.value = currentUser.value?.studentId || ''
     profileDepartment.value = currentUser.value?.department || ''
   }
+  loadRegisteredEvents()
 })
 
-// Registered events
+// ─── Real Event Data (from api.js) ────────────────────────────────────────
+const allApiEvents = ref<any[]>([])
+const eventsLoading = ref(false)
+
+async function loadRegisteredEvents() {
+  eventsLoading.value = true
+  try {
+    const eventData = await fetchEvents()
+    allApiEvents.value = eventData
+  } catch (err) {
+    console.error('Failed to load events for dashboard:', err)
+  } finally {
+    eventsLoading.value = false
+  }
+}
+
+// Registered events (from auth.js localStorage)
 const myRegistrations = ref(getUserRegistrations())
 
+// Map registration IDs to real event data from api.js
 const registeredEventsList = computed(() => {
-  const allEvents = [
-    { id: 'tech-summit', title: 'Tech Innovation Summit 2026', date: 'Jun 15, 2026', location: 'Main Auditorium', category: 'Technology' },
-    { id: 'career-fair', title: 'Annual Career Fair 2026', date: 'Jul 2, 2026', location: 'Student Center Hall', category: 'Career' },
-    { id: 'music-festival', title: 'Music Festival Spring 2026', date: 'Aug 20, 2026', location: 'Campus Park', category: 'Entertainment' },
-    { id: 'ai-workshop', title: 'AI & Machine Learning Workshop', date: 'Jun 22, 2026', location: 'CS Lab 301', category: 'Technology' },
-    { id: 'basketball', title: 'Inter-University Basketball Tournament', date: 'Jul 10, 2026', location: 'Sports Complex', category: 'Sports' },
-    { id: 'art-exhibit', title: 'Art Exhibition: Digital Horizons', date: 'Jul 15, 2026', location: 'Gallery Hall', category: 'Arts' },
-    { id: 'research-symposium', title: 'Research Symposium 2026', date: 'Aug 5, 2026', location: 'Science Block', category: 'Academic' },
-    { id: 'startup-pitch', title: 'Startup Pitch Night', date: 'Aug 12, 2026', location: 'Innovation Hub', category: 'Career' },
-    { id: 'dance-festival', title: 'Cultural Dance Festival', date: 'Aug 25, 2026', location: 'Open Air Stage', category: 'Arts' },
-  ]
-  return allEvents.filter(e => myRegistrations.value.some(r => r.eventId === e.id))
+  return myRegistrations.value
+    .map(reg => {
+      const event = allApiEvents.value.find(e => String(e.id) === String(reg.eventId))
+      if (!event) return null
+      return {
+        id: String(event.id),
+        title: event.title,
+        date: new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        rawDate: event.date,
+        location: event.venue,
+        category: event.category,
+        price: event.price,
+        image: event.image,
+        registeredAt: reg.registeredAt,
+      }
+    })
+    .filter(Boolean)
 })
 
-// --- VALIDATION LOGIC ---
+// ─── My Tickets Tab (from UserDashboard concept) ──────────────────────────
+const ticketTab = ref<'upcoming' | 'past'>('upcoming')
+
+const upcomingRegistered = computed(() => {
+  return registeredEventsList.value.filter(e => new Date() < new Date(e.rawDate + 'T00:00:00'))
+})
+
+const pastRegistered = computed(() => {
+  return registeredEventsList.value.filter(e => new Date() >= new Date(e.rawDate + 'T00:00:00'))
+})
+
+// ─── Quick Actions ────────────────────────────────────────────────────────
+const quickActions = computed(() => {
+  const actions = [
+    { label: 'Browse Events', icon: Search, path: '/gallery', color: 'bg-indigo-50 text-indigo-600' },
+    { label: 'My Bookings', icon: Ticket, path: '/bookings', color: 'bg-emerald-50 text-emerald-600' },
+    { label: 'Forum', icon: MessageCircle, path: '/forum', color: 'bg-purple-50 text-purple-600' },
+    { label: 'Feedback', icon: Star, path: '/feedback', color: 'bg-amber-50 text-amber-600' },
+  ]
+
+  // Add organizer-specific actions
+  if (userRole.value === 'organizer') {
+    actions.push({ label: 'Manage Events', icon: LayoutGrid, path: '/manage-events', color: 'bg-blue-50 text-blue-600' })
+  }
+
+  return actions
+})
+
+// ─── VALIDATION LOGIC ──────────────────────────────────────────────────────
 function validateProfile(): boolean {
   errors.value = {}
   let isValid = true
@@ -194,11 +247,29 @@ function handleChangePassword() {
     <div class="bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p class="text-gray-500">Manage your profile and view your event registrations</p>
+        <p class="text-gray-500">Manage your profile, view registrations, and navigate to key modules</p>
       </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Quick Actions Section -->
+      <div class="mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <router-link
+            v-for="action in quickActions"
+            :key="action.label"
+            :to="action.path"
+            class="flex flex-col items-center gap-2 p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all no-underline group"
+          >
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="action.color">
+              <component :is="action.icon" class="w-5 h-5" />
+            </div>
+            <span class="text-xs font-medium text-gray-700 group-hover:text-indigo-600 transition-colors">{{ action.label }}</span>
+          </router-link>
+        </div>
+      </div>
+
       <div class="grid lg:grid-cols-4 gap-8">
         <!-- Sidebar -->
         <div class="lg:col-span-1">
@@ -212,7 +283,7 @@ function handleChangePassword() {
               </div>
               <h3 class="text-lg font-semibold text-gray-900 mt-3">{{ userName }}</h3>
               <p class="text-sm text-gray-500">{{ userEmail }}</p>
-              <p class="text-xs text-gray-400 mt-1">{{ currentUser?.role === 'organizer' ? 'Organizer' : 'Student' }}</p>
+              <p class="text-xs text-gray-400 mt-1">{{ userRole === 'organizer' ? 'Organizer' : 'Student' }}</p>
             </div>
           </div>
 
@@ -224,6 +295,13 @@ function handleChangePassword() {
               :class="activeTab === 'profile' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50 bg-white'"
             >
               <User class="w-4 h-4" /> Profile Settings
+            </button>
+            <button
+              @click="activeTab = 'tickets'"
+              class="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-medium transition-colors border-none cursor-pointer text-left"
+              :class="activeTab === 'tickets' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50 bg-white'"
+            >
+              <Ticket class="w-4 h-4" /> My Tickets
             </button>
             <button
               @click="activeTab = 'registrations'"
@@ -391,12 +469,123 @@ function handleChangePassword() {
             </form>
           </div>
 
+          <!-- ========== MY TICKETS TAB (from UserDashboard concept) ========== -->
+          <div v-if="activeTab === 'tickets'" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-6 pb-0">
+              <h2 class="text-xl font-semibold text-gray-900 mb-1">My Tickets</h2>
+              <p class="text-sm text-gray-500 mb-4">Your booked event tickets</p>
+            </div>
+
+            <!-- Tabs: Upcoming / Past -->
+            <div class="border-b border-gray-200 flex px-6">
+              <button
+                @click="ticketTab = 'upcoming'"
+                class="px-4 py-3 text-sm font-medium border-b-2 transition-colors bg-transparent border-none cursor-pointer"
+                :class="ticketTab === 'upcoming'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'"
+              >
+                Upcoming
+                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[11px]"
+                  :class="ticketTab === 'upcoming' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'">
+                  {{ upcomingRegistered.length }}
+                </span>
+              </button>
+              <button
+                @click="ticketTab = 'past'"
+                class="px-4 py-3 text-sm font-medium border-b-2 transition-colors bg-transparent border-none cursor-pointer"
+                :class="ticketTab === 'past'
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'"
+              >
+                Past
+                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[11px]"
+                  :class="ticketTab === 'past' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'">
+                  {{ pastRegistered.length }}
+                </span>
+              </button>
+            </div>
+
+            <!-- Upcoming Events -->
+            <div v-if="ticketTab === 'upcoming'" class="p-6">
+              <div v-if="eventsLoading" class="text-center py-8">
+                <p class="text-gray-400 text-sm">Loading tickets...</p>
+              </div>
+              <div v-else-if="upcomingRegistered.length === 0" class="text-center py-8">
+                <Ticket class="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p class="text-gray-400 text-sm">No upcoming events</p>
+                <router-link
+                  to="/gallery"
+                  class="inline-flex items-center gap-2 mt-3 bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg no-underline hover:bg-indigo-600 transition-colors text-xs"
+                >
+                  <Search class="w-3.5 h-3.5" /> Browse Events
+                </router-link>
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="event in upcomingRegistered"
+                  :key="event.id"
+                  class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-indigo-100 transition-colors"
+                >
+                  <img v-if="event.image" :src="event.image" :alt="event.title" class="w-12 h-12 rounded-md object-cover flex-shrink-0" />
+                  <div v-else class="w-12 h-12 rounded-md bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <Calendar class="w-5 h-5 text-indigo-500" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-semibold text-gray-900 truncate">{{ event.title }}</h3>
+                    <p class="text-[11px] text-gray-400 mt-0.5">{{ event.date }} &bull; {{ event.location }}</p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span class="text-xs font-semibold" :class="event.price === 'Free' || event.price === 'Free Entry' ? 'text-green-600' : 'text-indigo-600'">{{ event.price }}</span>
+                    <span class="text-[11px] text-emerald-500 font-medium">Confirmed</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Past Events -->
+            <div v-if="ticketTab === 'past'" class="p-6">
+              <div v-if="pastRegistered.length === 0" class="text-center py-8">
+                <p class="text-gray-400 text-sm">No past events</p>
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="event in pastRegistered"
+                  :key="event.id"
+                  class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 opacity-60"
+                >
+                  <img v-if="event.image" :src="event.image" :alt="event.title" class="w-12 h-12 rounded-md object-cover flex-shrink-0 grayscale" />
+                  <div v-else class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <Calendar class="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-semibold text-gray-600 truncate">{{ event.title }}</h3>
+                    <p class="text-[11px] text-gray-400 mt-0.5">{{ event.date }}</p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span class="text-[11px] text-gray-400 font-medium">Attended</span>
+                    <router-link
+                      :to="'/feedback'"
+                      class="text-[11px] text-indigo-600 font-medium hover:underline no-underline"
+                    >
+                      Leave Feedback
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- ========== MY REGISTRATIONS TAB ========== -->
           <div v-if="activeTab === 'registrations'" class="bg-white rounded-2xl shadow-sm p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-1">My Registrations</h2>
             <p class="text-sm text-gray-500 mb-6">Events you've registered for</p>
 
-            <div v-if="registeredEventsList.length > 0" class="space-y-4">
+            <div v-if="eventsLoading" class="text-center py-8">
+              <p class="text-gray-400 text-sm">Loading registrations...</p>
+            </div>
+
+            <div v-else-if="registeredEventsList.length > 0" class="space-y-4">
               <div
                 v-for="event in registeredEventsList"
                 :key="event.id"

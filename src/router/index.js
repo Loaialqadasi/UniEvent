@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { isAuthenticated, isRoleAllowed } from '../service/auth'
+import { isAuthenticated, isRoleAllowed, authState } from '../service/auth'
 
 // ─── Core / Auth Views ────────────────────────────────────────────────────────
 import LoginView from '../views/LoginView.vue'
@@ -164,7 +164,9 @@ const router = createRouter({
 router.beforeEach((to) => {
   if (to.name === 'login') {
     if (isAuthenticated()) {
-      return { name: 'manage-events' }
+      // Redirect based on role: organizer → manage-events, student → gallery
+      const role = authState.user?.role
+      return { name: role === 'organizer' ? 'manage-events' : 'gallery' }
     }
     return true
   }
