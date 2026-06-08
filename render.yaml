@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: unievent
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm run build
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: unievent_db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: VITE_API_BASE_URL
+        value: ""
