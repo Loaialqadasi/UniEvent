@@ -156,7 +156,9 @@ const onSubmit = async () => {
       author: currentUser.value ? currentUser.value.name : 'Guest User'
     }
     const createdPost = await createForumPost(payload)
-    posts.value = [createdPost, ...posts.value]
+    // API returns { success, message, postId, post } — extract the post object
+    const newPost = createdPost.post || { postId: createdPost.postId, userId: currentUser.value?.id, eventId: Number(form.value.eventId), title: form.value.title, content: form.value.content, author: currentUser.value?.name || 'Guest User', createdAt: new Date().toISOString() }
+    posts.value = [newPost, ...posts.value]
     
     // Reset form
     form.value.title = ''

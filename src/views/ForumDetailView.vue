@@ -118,7 +118,9 @@ const onAddComment = async () => {
       author: currentUser.value ? currentUser.value.name : 'Guest User'
     }
     const created = await createComment(payload)
-    comments.value = [...comments.value, created]
+    // API returns { success, message, commentId, comment } — extract the comment object
+    const newComment = created.comment || { commentId: created.commentId, postId, userId: currentUser.value?.id, content: val, author: currentUser.value?.name || 'Guest User', createdAt: new Date().toISOString() }
+    comments.value = [...comments.value, newComment]
     newCommentContent.value = ''
   } catch (err) {
     commentError.value = err.message || 'Failed to submit comment.'

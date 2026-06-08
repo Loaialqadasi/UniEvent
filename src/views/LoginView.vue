@@ -46,7 +46,7 @@ const onSubmit = async () => {
   busy.value = true
 
   try {
-    const user = loginWithPassword(form.email, form.password)
+    const user = await loginWithPassword(form.email, form.password)
     const defaultRedirect = user.role === 'organizer' ? '/manage-events' : '/gallery'
     const redirectTo = typeof route.query.redirect === 'string' ? route.query.redirect : defaultRedirect
     await router.replace(redirectTo)

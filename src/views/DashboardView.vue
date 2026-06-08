@@ -64,6 +64,7 @@ onMounted(() => {
     profileDepartment.value = currentUser.value?.department || ''
   }
   loadRegisteredEvents()
+  loadRegistrations()
 })
 
 // ─── Real Event Data (from api.js) ────────────────────────────────────────
@@ -83,7 +84,16 @@ async function loadRegisteredEvents() {
 }
 
 // Registered events (from auth.js localStorage)
-const myRegistrations = ref(getUserRegistrations())
+const myRegistrations = ref([])
+
+// Load registrations from API
+async function loadRegistrations() {
+  try {
+    myRegistrations.value = await getUserRegistrations()
+  } catch (err) {
+    console.error('Failed to load registrations:', err)
+  }
+}
 
 // Map registration IDs to real event data from api.js
 const registeredEventsList = computed(() => {
@@ -182,14 +192,14 @@ function validateProfile(): boolean {
   return isValid
 }
 
-function saveProfile() {
+async function saveProfile() {
   saveSuccess.value = false
 
   if (!validateProfile()) {
     return
   }
 
-  const result = updateProfile({
+  const result = await updateProfile({
     name: profileName.value.trim(),
     email: profileEmail.value.trim(),
     phone: profilePhone.value.trim(),
@@ -207,7 +217,7 @@ function saveProfile() {
 }
 
 // --- PASSWORD CHANGE ---
-function handleChangePassword() {
+async function handleChangePassword() {
   passwordError.value = ''
   passwordSuccess.value = ''
 
@@ -228,7 +238,7 @@ function handleChangePassword() {
     return
   }
 
-  const result = changePassword(currentPassword.value, newPassword.value)
+  const result = await changePassword(currentPassword.value, newPassword.value)
   if (result.success) {
     passwordSuccess.value = result.message
     currentPassword.value = ''

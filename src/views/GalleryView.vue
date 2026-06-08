@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, inject, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
 import { Search, MapPin, Clock, Users, CheckCircle, Loader2, Ticket } from 'lucide-vue-next'
 import { authState, registerForEvent, unregisterFromEvent, isRegisteredForEvent } from '../service/auth'
+import { fetchEvents } from '../service/api'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -14,33 +14,37 @@ const fetchError = ref('')
 
 const categories = ['All', 'Technology', 'Career', 'Academic', 'Sports', 'Arts', 'Entertainment']
 
-// Events array - loaded asynchronously from events.json via Axios
+// Events array - loaded from backend API
 const events = ref<Array<{
   id: number
   title: string
   date: string
   time: string
+  venue: string
   location: string
   attendees: number
   category: string
   price: string
+  image: string
   image_url: string
   description: string
 }>>([])
 
-// ---- ASYNC DATA FETCHING WITH AXIOS ----
+// ---- ASYNC DATA FETCHING FROM REST API ----
 onMounted(async () => {
   try {
     isLoading.value = true
     fetchError.value = ''
 
-    // Async Axios GET request to fetch event data from events.json
-    const response = await axios.get('/data/events.json')
+    // Fetch events from backend REST API via Axios
+    const eventData = await fetchEvents()
+    events.value = eventData.map(e => ({
+      ...e,
+      location: e.venue || e.location || '',
+      image_url: e.image || e.image_url || '',
+    }))
 
-    // The response.data is a flat array of events
-    events.value = response.data
-
-    console.log('Events loaded via Axios:', events.value.length, 'events fetched')
+    console.log('Events loaded via REST API:', events.value.length, 'events fetched')
   } catch (error: any) {
     console.error('Failed to fetch events:', error)
     fetchError.value = 'Failed to load events. Please try again later.'
@@ -118,7 +122,7 @@ function categoryBadgeClass(cat: string) {
   }[cat] || 'bg-gray-100 text-gray-700'
 }
 
-const handleRegister = (eventId: number) => {
+const handleRegister = async (eventId: number) => {
   const eventIdStr = String(eventId)
   if (!isLoggedIn.value) {
     if (openSignIn) openSignIn()
@@ -126,7 +130,7 @@ const handleRegister = (eventId: number) => {
   }
 
   if (registeredEvents.value.has(eventIdStr)) {
-    const result = unregisterFromEvent(eventIdStr)
+    const result = await unregisterFromEvent(eventIdStr)
     if (result.success) {
       registeredEvents.value.delete(eventIdStr)
       eventMessages.value[eventIdStr] = { text: result.message, type: 'success' }
@@ -134,7 +138,7 @@ const handleRegister = (eventId: number) => {
       eventMessages.value[eventIdStr] = { text: result.message, type: 'error' }
     }
   } else {
-    const result = registerForEvent(eventIdStr)
+    const result = await registerForEvent(eventIdStr)
     if (result.success) {
       registeredEvents.value.add(eventIdStr)
       eventMessages.value[eventIdStr] = { text: result.message, type: 'success' }
